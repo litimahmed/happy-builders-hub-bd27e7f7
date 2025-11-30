@@ -16,34 +16,127 @@ import {
   Instagram,
   Linkedin,
   Twitter,
+  Phone,
+  Printer
 } from "lucide-react";
 import { useTranslation } from "@/contexts/TranslationContext";
 import { Link } from "react-router-dom";
 import ToorriiLogo from "@/assets/toorrii-logo.png";
-
-// Contact information - first column
-const contactInfoPrimary = [
-  { icon: Mail, label: "Email", value: "contact@toorrii.com", href: "mailto:contact@toorrii.com", color: "text-red-500", bg: "bg-red-50 hover:bg-red-100" },
-  { icon: MapPin, label: "Address", value: "Algiers, Algeria", href: "#", color: "text-blue-500", bg: "bg-blue-50 hover:bg-blue-100" },
-  { icon: Clock, label: "Hours", value: "9:00 - 17:00", href: "#", color: "text-orange-500", bg: "bg-orange-50 hover:bg-orange-100" },
-  { icon: Globe, label: "Website", value: "www.toorrii.com", href: "https://www.toorrii.com", color: "text-primary", bg: "bg-primary/10 hover:bg-primary/20" },
-];
-
-// Social links - second column
-const socialLinks = [
-  { icon: Facebook, label: "Facebook", value: "/toorrii", href: "https://facebook.com/toorrii", color: "text-blue-600", bg: "bg-blue-50 hover:bg-blue-100" },
-  { icon: Instagram, label: "Instagram", value: "@toorrii", href: "https://instagram.com/toorrii", color: "text-pink-600", bg: "bg-pink-50 hover:bg-pink-100" },
-  { icon: Linkedin, label: "LinkedIn", value: "/company/toorrii", href: "https://linkedin.com/company/toorrii", color: "text-blue-700", bg: "bg-blue-50 hover:bg-blue-100" },
-  { icon: Twitter, label: "X", value: "@toorrii", href: "https://x.com/toorrii", color: "text-foreground", bg: "bg-muted hover:bg-muted/80" },
-];
+import { useContactInfo } from "@/hooks/useContactInfo";
+import { TbBrandTiktok } from "react-icons/tb";
 
 /**
  * @component Footer
  * @description The main footer component.
  */
 const Footer = () => {
-  // Hook to get the translation function.
-  const { t, isRTL } = useTranslation();
+  // Hook to get the translation function and contact data.
+  const { t, isRTL, language } = useTranslation();
+  const { data: contactData } = useContactInfo();
+  
+  type TranslatableField = { fr: string; ar: string; en: string; } | undefined;
+  type Language = 'en' | 'fr' | 'ar';
+
+  const getTranslated = (field: TranslatableField) => {
+    if (!field) return '';
+    return field[language as Language] || field['en'] || '';
+  };
+
+  // Contact information - dynamically from API
+  const contactInfoPrimary = [
+    contactData?.email && { 
+      icon: Mail, 
+      label: "Email", 
+      value: contactData.email, 
+      href: `mailto:${contactData.email}`, 
+      color: "text-red-500", 
+      bg: "bg-red-50 hover:bg-red-100" 
+    },
+    contactData?.telephone_1 && { 
+      icon: Phone, 
+      label: "Phone", 
+      value: contactData.telephone_1, 
+      href: `tel:${contactData.telephone_1}`, 
+      color: "text-green-500", 
+      bg: "bg-green-50 hover:bg-green-100" 
+    },
+    contactData?.telephone_fixe && { 
+      icon: Printer, 
+      label: "Fax", 
+      value: contactData.telephone_fixe, 
+      href: `tel:${contactData.telephone_fixe}`, 
+      color: "text-purple-500", 
+      bg: "bg-purple-50 hover:bg-purple-100" 
+    },
+    contactData?.adresse && { 
+      icon: MapPin, 
+      label: "Address", 
+      value: `${getTranslated(contactData.adresse)}, ${getTranslated(contactData.ville)}`, 
+      href: "#", 
+      color: "text-blue-500", 
+      bg: "bg-blue-50 hover:bg-blue-100" 
+    },
+    contactData?.horaires && { 
+      icon: Clock, 
+      label: "Hours", 
+      value: contactData.horaires, 
+      href: "#", 
+      color: "text-orange-500", 
+      bg: "bg-orange-50 hover:bg-orange-100" 
+    },
+    contactData?.site_web && { 
+      icon: Globe, 
+      label: "Website", 
+      value: contactData.site_web.replace(/^https?:\/\//, ''), 
+      href: contactData.site_web, 
+      color: "text-primary", 
+      bg: "bg-primary/10 hover:bg-primary/20" 
+    },
+  ].filter(Boolean);
+
+  // Social links - dynamically from API
+  const socialLinks = [
+    contactData?.facebook && { 
+      icon: Facebook, 
+      label: "Facebook", 
+      value: "/toorrii", 
+      href: contactData.facebook, 
+      color: "text-blue-600", 
+      bg: "bg-blue-50 hover:bg-blue-100" 
+    },
+    contactData?.instagram && { 
+      icon: Instagram, 
+      label: "Instagram", 
+      value: "@toorrii", 
+      href: contactData.instagram, 
+      color: "text-pink-600", 
+      bg: "bg-pink-50 hover:bg-pink-100" 
+    },
+    contactData?.linkedin && { 
+      icon: Linkedin, 
+      label: "LinkedIn", 
+      value: "/company/toorrii", 
+      href: contactData.linkedin, 
+      color: "text-blue-700", 
+      bg: "bg-blue-50 hover:bg-blue-100" 
+    },
+    contactData?.x && { 
+      icon: Twitter, 
+      label: "X", 
+      value: "@toorrii", 
+      href: contactData.x, 
+      color: "text-foreground", 
+      bg: "bg-muted hover:bg-muted/80" 
+    },
+    contactData?.tiktok && { 
+      icon: TbBrandTiktok, 
+      label: "TikTok", 
+      value: "@toorrii", 
+      href: contactData.tiktok, 
+      color: "text-foreground", 
+      bg: "bg-muted hover:bg-muted/80" 
+    },
+  ].filter(Boolean);
   
   // Pages to display in the footer navigation
   const pageLinks = [
